@@ -99,7 +99,7 @@ class simulator_func_mysql:
         self.buy_stop = False
 
         # AI알고리즘 사용 여부 (고급 챕터에서 소개)
-        self.use_ai = False  # ai 알고리즘 사용 시 True 사용 안하면 False
+        self.use_ai = True  # ai 알고리즘 사용 시 True 사용 안하면 False
         self.ai_filter_num = 1  # ai 알고리즘 선택
 
         # 실시간 조건 매수 옵션 (고급 챕터에서 소개)

@@ -32,7 +32,7 @@ class Trader(QMainWindow):
         ############################################
 
         ################ 테스트용 ###################
-        # 장시작 시간 설정
+        # # 장시작 시간 설정
         # self.market_start_time = QTime(0, 0, 0)
         # # 장마감 시간 설정
         # self.market_end_time = QTime(23, 59, 0)

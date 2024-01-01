@@ -1,7 +1,7 @@
 @Echo off
 @Echo collector Start
 set x=0
-call "%HOMEPATH%\Anaconda3\Scripts\activate.bat" py37_32
+call "C:\Python\anaconda3_x86\Scripts\activate.bat" base
 @taskkill /f /im python.exe 2> NUL
 
 :repeat

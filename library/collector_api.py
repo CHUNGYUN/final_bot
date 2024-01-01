@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from sqlalchemy import Integer, Text, Float, String
+from sqlalchemy.inspection import inspect
 
 ver = "#version 1.5.0"
 print(f"collector_api Version: {ver}")
@@ -533,7 +534,8 @@ class collector_api():
             UPDATE daily_buy_list.stock_item_all SET check_daily_crawler = '4' WHERE code = '{}'
         """
 
-        if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_craw, code_name):
+        # if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_craw, code_name):
+        if inspect(self.open_api.engine_daily_craw).has_table(code_name):
             check_row = self.open_api.engine_daily_craw.execute(f"""
                 SELECT * FROM `{code_name}` WHERE date = '{oldest_row['date']}' LIMIT 1
             """).fetchall()
@@ -550,7 +552,8 @@ class collector_api():
                             """).first() # daily_craw 종목테이블에서 search_date 보다는 과거 데이터이고 가장 오래된 row를 찾는다.
                 if dc_item:
                     dc_date, dc_close = dc_item
-                    if self.open_api.engine_daily_buy_list.dialect.has_table(self.open_api.engine_daily_buy_list, dc_date):
+                    # if self.open_api.engine_daily_buy_list.dialect.has_table(self.open_api.engine_daily_buy_list, dc_date):
+                    if inspect(self.open_api.engine_daily_buy_list).has_table(dc_date):
                         dbl_close = self.engine_JB.execute(f"""
                             SELECT close FROM daily_buy_list.`{dc_date}` WHERE code = '{code}'
                         """).fetchall()
@@ -658,7 +661,8 @@ class collector_api():
         df_temp['vol120'] = df_temp['volume'].rolling(window=120).mean()
 
         # 여기 이렇게 추가해야함
-        if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_craw, code_name):
+        # if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_craw, code_name):
+        if inspect(self.open_api.engine_daily_craw).has_table(code_name):
             df_temp = df_temp[df_temp.date > self.open_api.get_daily_craw_db_last_date(code_name)]
 
         if len(df_temp) == 0 and check_daily_crawler != '4':
@@ -707,7 +711,8 @@ class collector_api():
                     new_data = df_temp[df_temp.date == row.tname]
                 except KeyError:
                     continue
-                if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_buy_list, row.tname):
+                # if self.open_api.engine_daily_craw.dialect.has_table(self.open_api.engine_daily_buy_list, row.tname):
+                if inspect(self.open_api.engine_daily_craw).has_table(row.tname):
                     self.open_api.engine_daily_buy_list.execute(f"""
                         DELETE FROM `{row.tname}` WHERE code = '{code}'
                     """)
@@ -1210,7 +1215,8 @@ class collector_api():
         extract_from = datetime.date.today() - timedelta(days=10)
         extract_from = extract_from.strftime(strformat)
 
-        if self.open_api.engine_daily_buy_list.dialect.has_table(self.open_api.engine_daily_buy_list, table_name):
+        # if self.open_api.engine_daily_buy_list.dialect.has_table(self.open_api.engine_daily_buy_list, table_name):
+        if inspect(self.open_api.engine_daily_buy_list).has_table(table_name):
             existing_data = self.open_api.engine_daily_buy_list.execute(f"""
                 SELECT date, code FROM {table_name} WHERE date >= {extract_from}
             """).fetchall()

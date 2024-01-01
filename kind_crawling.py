@@ -27,6 +27,10 @@ from sqlalchemy import create_engine, VARCHAR, DATE
 from sqlalchemy.engine.url import URL
 from sqlalchemy.exc import InternalError, OperationalError
 
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager	# 설치필요
+from selenium.webdriver.common.by import By
+
 from library import cf
 
 pymysql.install_as_MySQLdb()
@@ -92,7 +96,8 @@ class KINDCrawler:
 
     # kind 사이트에 달력에 날짜를 설정하는 함수
     def date_select(self, start, end):
-        selected_tag_a = self.driver.find_element_by_css_selector('input#startDate')
+        # selected_tag_a = self.driver.find_element_by_css_selector('input#startDate')
+        selected_tag_a = self.driver.find_element(By.CSS_SELECTOR, 'input#startDate')
         selected_tag_a.click()
 
         # 칸에서 가장 끝으로 이동
@@ -104,7 +109,8 @@ class KINDCrawler:
             selected_tag_a.send_keys(Keys.BACKSPACE)
         selected_tag_a.send_keys(start.strftime('%Y%m%d'))
 
-        selected_tag_a = self.driver.find_element_by_css_selector('input#endDate')
+        # selected_tag_a = self.driver.find_element_by_css_selector('input#endDate')
+        selected_tag_a = self.driver.find_element(By.CSS_SELECTOR, 'input#endDate')
         selected_tag_a.click()
 
         selected_tag_a.send_keys(Keys.END)
@@ -125,7 +131,8 @@ class KINDCrawler:
     def insert_to(self, file_name, table_name):
         print("insert {} into {}".format(file_name, table_name))
         # kind 검색(윈도우 사이즈
-        element = self.driver.find_element_by_xpath('//*[@id="searchForm"]/section/div/div[3]/a[1]')
+        # element = self.driver.find_element_by_xpath('//*[@id="searchForm"]/section/div/div[3]/a[1]')
+        element = self.driver.find_element(By.XPATH, '//*[@id="searchForm"]/section/div/div[3]/a[1]')
 
         self.driver.execute_script('arguments[0].scrollIntoView(true);', element) # 사이트 포지션 이동
         self.driver.execute_script('window.scrollBy(100, 0)') # 사이트 포지션 이동
@@ -134,7 +141,8 @@ class KINDCrawler:
         self.dialog_block_wait() #로딩이 끝나는 순간까지 대기
 
         # kind 엑셀다운로드 (촬영 후 Enter를 click으로 변경 했습니다.)
-        element = self.driver.find_element_by_xpath('//*[@id="searchForm"]/section/div/div[3]/a[2]')
+        # element = self.driver.find_element_by_xpath('//*[@id="searchForm"]/section/div/div[3]/a[2]')
+        element = self.driver.find_element(By.XPATH, '//*[@id="searchForm"]/section/div/div[3]/a[2]')
         self.driver.execute_script('arguments[0].scrollIntoView(true);', element)
         self.driver.execute_script('window.scrollBy(100, 0)')
         self.take_snapshot('before_click.png')
@@ -202,11 +210,12 @@ class KINDCrawler:
     # crawling하고, db에 넣는 함수
     def crawl_and_insert(self, file_name, table_name):
         # 달력이 종목 탭을 가려서 탭(투자위험종목 등) 클릭을 못하는 경우를 방지
-        search_bar = self.driver.find_element_by_css_selector('#AKCKwd')
+        # search_bar = self.driver.find_element_by_css_selector('#AKCKwd')
+        search_bar = self.driver.find_element(By.CSS_SELECTOR, '#AKCKwd')
         self.driver.execute_script('arguments[0].scrollIntoView(true);', search_bar) #추가 코드. 클릭 할 위치로 scroll
         search_bar.click() #클릭
 
-        selected_tab = self.driver.find_element_by_css_selector('a[title="{}"]'.format(file_name.split('.')[0]))
+        selected_tab = self.driver.find_element(By.CSS_SELECTOR, 'a[title="{}"]'.format(file_name.split('.')[0]))
         self.actions.move_to_element(search_bar) # 추가 코드. 클릭 할 위치로 scroll
         self.driver.execute_script('window.scrollBy(100, 0)') # 추가 코드. 클릭 할 위치로 scroll
         selected_tab.click() # 클릭
@@ -234,14 +243,20 @@ class KINDCrawler:
         # 셀레니움의 상태 확인용 스냅샷 디렉토리 확인 및 생성(촬영 후 추가된 코드입니다.)
         pathlib.Path(self.snapshot_path).mkdir(exist_ok=True)
         # 아래 라인들은 촬영 후 variable_setting 함수에 있던 것을 옮겨왔습니다.
-        options = webdriver.ChromeOptions()
+        # options = webdriver.ChromeOptions()
         # Selenium이 띄운 크롬창의 다운로드 폴더 경로를 지정 (bot 프로젝트 폴더안의 KIND_xls 폴더)
-        options.add_experimental_option("prefs", {"download.default_directory": str(self.download_path)})
-
-        path = self.chrome_driver_update() # 크롬 드라이버를 자동으로 path 위치에 설치합니다
-
+        # options.add_experimental_option("prefs", {"download.default_directory": str(self.download_path)})
+        # print(self.download_path)
+        # path = self.chrome_driver_update() # 크롬 드라이버를 자동으로 path 위치에 설치합니다
+        # print(path)
+        # path = 'C:/Python/chromedriver_win32/chromedriver.exe'
         '''자동으로 크롬드라이버가 설치 되도록 업데이트 되었습니다. 따로 C드라이브에 크롬드라이버를 설치 하지 않으셔도 됩니다.'''
-        self.driver = webdriver.Chrome(path, options=options)
+        service = Service()
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option("prefs", {"download.default_directory": str(self.download_path)})
+        self.driver = webdriver.Chrome(service=service, options=options)
+
+        # self.driver = webdriver.Chrome(path, options=options)
         self.driver.implicitly_wait(10)  # get(url)로 요청한 페이지 내용들이 모두 로딩이 완료될 때까지 int(초) 만큼 암묵적으로 기다린다
 
         self.actions = ActionChains(self.driver)  # 스크롤 이동을 위한 ActionChains 객체
@@ -329,7 +344,6 @@ class KINDCrawler:
         path = chromedriver_autoinstaller.install()  # Check if the current version of chromedriver exists
                                               # and if it doesn't exist, download it automatically,
                                               # then add chromedriver to path
-
 
         print("chrome_driver_update 완료!")
         return path
