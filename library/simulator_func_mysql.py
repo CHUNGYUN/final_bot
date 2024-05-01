@@ -115,7 +115,7 @@ class simulator_func_mysql:
 
         if self.simul_num in (1, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18):
             # 시뮬레이팅 시작 일자(분 별 시뮬레이션의 경우 최근 1년 치 데이터만 있기 때문에 start_date 조정 필요)
-            self.simul_start_date = "20190101"
+            self.simul_start_date = "20220101"
 
             ######### 알고리즘 선택 #############
             # 매수 리스트 설정 알고리즘 번호
@@ -237,7 +237,7 @@ class simulator_func_mysql:
 
         elif self.simul_num == 2:
             # 시뮬레이팅 시작 일자
-            self.simul_start_date = "20190101"
+            self.simul_start_date = "20220101"
 
             ######### 알고리즘 선택 #############
             # 매수 리스트 설정 알고리즘 번호
